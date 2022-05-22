@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pool
+  template:
+    metadata:
+      labels:
+        app: pool
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": windows
+      containers:
+      - name: pool
+        image: my3rddemoacr.azurecr.io/pollapp:1.01
+        ports:
+        - containerPort: 8000
+        env:
+        - name: APPNAME
+          value: "pool"
+        volumeMounts:
+          - mountPath: "/mnt/azure"
+            name: volume
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: poll-azurefile-share
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pool
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8000
+  selector:
+    app: pool
+
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: poll-azurefile-share
+provisioner: kubernetes.io/azure-file
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=0
+  - gid=0
+  - mfsymlinks
+  - cache=strict
+  - actimeo=30
+parameters:
+  skuName: Standard_LRS
+  shareName: poll-app-file-share
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: poll-azurefile-share
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: poll-azurefile-share
+  resources:
+    requests:
+      storage: 5Gi
