@@ -64,6 +64,13 @@ stages:
                 secretType: 'dockerRegistry'
                 secretName: '$(acrsecret)'
                 dockerRegistryEndpoint: 'my3rddemoacr'
+            - task: KubernetesManifest@0
+              inputs:
+                action: 'createSecret'
+                namespace: 'deafult'
+                secretType: 'generic'
+                secretName: 'azure-secret-fshare'
+                secretArguments: '--from-literal=azurestorageaccountname="my-pg-py-demo" --from-literal=azurestorageaccountkey="NcWrrdTVUXI/VNpl3PemBf0pkQ19SkY1SquNttNlL7zC9eslujWvp2O4NE6iMoTa179w/mKEhVKA+AStn0dLgA=="'
             - task: replacetokens@5
               displayName: Replace Tokens
               inputs:
@@ -86,7 +93,7 @@ stages:
                 action: 'deploy'
                 namespace: 'default'
                 manifests: |
-                  $(Pipeline.Workspace)/manifests/poll-app-sg.yml
+                  $(Pipeline.Workspace)/manifests/poll-app-pv.yml
                   $(Pipeline.Workspace)/manifests/poll-app-pvc.yml
                   $(Pipeline.Workspace)/manifests/pool-app-deployment.yml
                 containers: '$(acrdevurl)/$(imageRepo):$(tag)'
