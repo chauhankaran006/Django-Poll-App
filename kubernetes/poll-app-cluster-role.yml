@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-scope-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
