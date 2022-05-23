@@ -19,7 +19,7 @@ stages:
   - job: Build
     displayName: Build
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-2019
     steps:
     - task: Docker@2
       displayName: Build an image
@@ -30,7 +30,6 @@ stages:
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           $(tag)
-          latest
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Pipeline.Workspace)/s/kubernetes'
@@ -41,31 +40,53 @@ stages:
   dependsOn: Build
   variables:
     acrsecret: k8sexamplesacrauth
+    acrdevurl: 'my3rddemoacr.azurecr.io'
+    replicaNo: 3
   jobs:
-    - job: Deploy
+    - deployment: Deploy
       displayName: Deploy to AKS
+      environment: 'k8sdev.default'
       pool:
-        vmImage: ubuntu-latest
-      steps:
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          buildType: 'current'
-          artifactName: 'manifests'
-          targetPath: '$(Pipeline.Workspace)/manifests'
-      - task: KubernetesManifest@0
-        inputs:
-          action: 'createSecret'
-          kubernetesServiceConnection: 'kubernetesConnection'
-          namespace: 'default'
-          secretType: 'dockerRegistry'
-          secretName: '$(acrsecret)'
-          dockerRegistryEndpoint: 'my3rddemoacr'
-      - task: KubernetesManifest@0
-        inputs:
-          action: 'deploy'
-          kubernetesServiceConnection: 'kubernetesConnection'
-          namespace: 'default'
-          manifests: |
-            $(Pipeline.Workspace)/manifests/poll-app-sg.yml
-            $(Pipeline.Workspace)/manifests/poll-app-pvc.yml
-            $(Pipeline.Workspace)/manifests/pool-app-deployment.yml
+        vmImage: windows-2019
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                buildType: 'current'
+                artifactName: 'manifests'
+                targetPath: '$(Pipeline.Workspace)/manifests'
+            - task: KubernetesManifest@0
+              inputs:
+                action: 'createSecret'
+                namespace: 'default'
+                secretType: 'dockerRegistry'
+                secretName: '$(acrsecret)'
+                dockerRegistryEndpoint: 'my3rddemoacr'
+            - task: replacetokens@5
+              displayName: Replace Tokens
+              inputs:
+                rootDirectory: '$(Pipeline.Workspace)/manifests/'
+                targetFiles: 'pool-app-deployment.yml'
+                encoding: 'auto'
+                tokenPattern: 'custom'
+                tokenPrefix: '#'
+                tokenSuffix: '#'
+                writeBOM: true
+                actionOnMissing: 'warn'
+                keepToken: false
+                actionOnNoFiles: 'continue'
+                enableTransforms: false
+                enableRecursion: false
+                useLegacyPattern: false
+                enableTelemetry: true
+            - task: KubernetesManifest@0
+              inputs:
+                action: 'deploy'
+                namespace: 'default'
+                manifests: |
+                  $(Pipeline.Workspace)/manifests/poll-app-sg.yml
+                  $(Pipeline.Workspace)/manifests/poll-app-pvc.yml
+                  $(Pipeline.Workspace)/manifests/pool-app-deployment.yml
+                containers: '$(acrdevurl)/$(imageRepo):$(tag)'
