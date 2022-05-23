@@ -45,7 +45,6 @@ stages:
   jobs:
     - deployment: Deploy
       displayName: Deploy to AKS
-      #environment: 'k8sdev.default'
       pool:
         vmImage: windows-2019
       strategy:
