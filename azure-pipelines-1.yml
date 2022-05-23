@@ -42,30 +42,32 @@ stages:
   variables:
     acrsecret: k8sexamplesacrauth
   jobs:
-    - job: Deploy
+    - deployment: Deploy
       displayName: Deploy to AKS
+      environment: 'k8sdev.default'
       pool:
         vmImage: windows-2019
-      steps:
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          buildType: 'current'
-          artifactName: 'manifests'
-          targetPath: '$(Pipeline.Workspace)/manifests'
-      - task: KubernetesManifest@0
-        inputs:
-          action: 'createSecret'
-          kubernetesServiceConnection: 'kubernetesConnection'
-          namespace: 'default'
-          secretType: 'dockerRegistry'
-          secretName: '$(acrsecret)'
-          dockerRegistryEndpoint: 'my3rddemoacr'
-      - task: KubernetesManifest@0
-        inputs:
-          action: 'deploy'
-          kubernetesServiceConnection: 'kubernetesConnection'
-          namespace: 'default'
-          manifests: |
-            $(Pipeline.Workspace)/manifests/poll-app-sg.yml
-            $(Pipeline.Workspace)/manifests/poll-app-pvc.yml
-            $(Pipeline.Workspace)/manifests/pool-app-deployment.yml
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                buildType: 'current'
+                artifactName: 'manifests'
+                targetPath: '$(Pipeline.Workspace)/manifests'
+            - task: KubernetesManifest@0
+              inputs:
+                action: 'createSecret'
+                namespace: 'default'
+                secretType: 'dockerRegistry'
+                secretName: '$(acrsecret)'
+                dockerRegistryEndpoint: 'my3rddemoacr'
+            - task: KubernetesManifest@0
+              inputs:
+                action: 'deploy'
+                namespace: 'default'
+                manifests: |
+                  $(Pipeline.Workspace)/manifests/poll-app-sg.yml
+                  $(Pipeline.Workspace)/manifests/poll-app-pvc.yml
+                  $(Pipeline.Workspace)/manifests/pool-app-deployment.yml
