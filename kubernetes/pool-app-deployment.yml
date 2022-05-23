@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": windows
       containers:
       - name: pool
-        image: my3rddemoacr.azurecr.io/pollapp:1.01
+        image: my3rddemoacr.azurecr.io/pollmeapp
         ports:
         - containerPort: 8000
         env:
