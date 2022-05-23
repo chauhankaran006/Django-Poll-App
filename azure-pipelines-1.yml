@@ -67,7 +67,7 @@ stages:
             - task: KubernetesManifest@0
               inputs:
                 action: 'createSecret'
-                namespace: 'deafult'
+                namespace: 'default'
                 secretType: 'generic'
                 secretName: 'azure-secret-fshare'
                 secretArguments: '--from-literal=azurestorageaccountname="my-pg-py-demo" --from-literal=azurestorageaccountkey="NcWrrdTVUXI/VNpl3PemBf0pkQ19SkY1SquNttNlL7zC9eslujWvp2O4NE6iMoTa179w/mKEhVKA+AStn0dLgA=="'
@@ -88,6 +88,14 @@ stages:
                 enableRecursion: false
                 useLegacyPattern: false
                 enableTelemetry: true
+            - task: KubernetesManifest@0
+              inputs:
+                action: 'deploy'
+                kubernetesServiceConnection: 'kubernetesConnection'
+                namespace: 'default'
+                manifests: |
+                  $(Pipeline.Workspace)/manifests/poll-app-cluster-role.yml
+                  $(Pipeline.Workspace)/manifests/poll-app-cluster-role-bind.yml
             - task: KubernetesManifest@0
               inputs:
                 action: 'deploy'
