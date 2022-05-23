@@ -67,7 +67,7 @@ stages:
             - task: KubernetesManifest@0
               inputs:
                 action: 'createSecret'
-                namespace: 'deafult'
+                namespace: 'default'
                 secretType: 'generic'
                 secretName: 'azure-secret-fshare'
                 secretArguments: '--from-literal=azurestorageaccountname="my-pg-py-demo" --from-literal=azurestorageaccountkey="NcWrrdTVUXI/VNpl3PemBf0pkQ19SkY1SquNttNlL7zC9eslujWvp2O4NE6iMoTa179w/mKEhVKA+AStn0dLgA=="'
