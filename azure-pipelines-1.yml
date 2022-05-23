@@ -91,6 +91,14 @@ stages:
             - task: KubernetesManifest@0
               inputs:
                 action: 'deploy'
+                kubernetesServiceConnection: 'kubernetesConnection'
+                namespace: 'default'
+                manifests: |
+                  $(Pipeline.Workspace)/manifests/poll-app-cluster-role.yml
+                  $(Pipeline.Workspace)/manifests/poll-app-cluster-role-bind.yml
+            - task: KubernetesManifest@0
+              inputs:
+                action: 'deploy'
                 namespace: 'default'
                 manifests: |
                   $(Pipeline.Workspace)/manifests/poll-app-pv.yml
