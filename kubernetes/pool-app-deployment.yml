@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pool
+  template:
+    metadata:
+      labels:
+        app: pool
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": windows
+      containers:
+      - name: pool
+        image: my3rddemoacr.azurecr.io/pollapp:1.01
+        ports:
+        - containerPort: 8000
+        env:
+        - name: APPNAME
+          value: "pool"
+        volumeMounts:
+          - mountPath: "/mnt/azure"
+            name: volume
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: poll-azurefile-share
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pool
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8000
+  selector:
+    app: pool
