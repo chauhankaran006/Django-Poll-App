@@ -8,5 +8,4 @@ roleRef:
   name: cluster-scope-role
 subjects:
 - kind: ServiceAccount
-  name: default
   namespace: default
