@@ -94,5 +94,6 @@ stages:
           manifests: |
             $(Pipeline.Workspace)/manifests/poll-app-pv.yml
             $(Pipeline.Workspace)/manifests/poll-app-pvc.yml
+            $(Pipeline.Workspace)/manifests/poll-app-secret-provider-class.yml
             $(Pipeline.Workspace)/manifests/pool-app-deployment.yml
           containers: '$(acrdevurl)/$(imageRepo):$(tag)'
