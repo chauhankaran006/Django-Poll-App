@@ -38,15 +38,15 @@ spec:
               name: akvsecretscertwin
               key: DB_PASSWORD
         - name: db_port
-            valueFrom:
-              secretKeyRef:
-                name: akvsecretscertwin
-                key: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: akvsecretscertwin
+              key: DB_PORT
         - name: db_name
-            valueFrom:
-              secretKeyRef:
-                name: akvsecretscertwin
-                key: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: akvsecretscertwin
+              key: DB_NAME
         volumeMounts:
           - mountPath: "/mnt/azure"
             name: volume
