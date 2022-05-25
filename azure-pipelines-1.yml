@@ -41,7 +41,7 @@ stages:
   variables:
     acrsecret: k8sexamplesacrauth
     acrdevurl: 'my3rddemoacr.azurecr.io'
-    replicaNo: 4
+    replicaNo: 2
   jobs:
     - job: Deploy
       displayName: Deploy to AKS
@@ -79,25 +79,6 @@ stages:
           secretType: 'generic'
           secretName: 'azure-secret-fshare'
           secretArguments: '--from-literal=azurestorageaccountname=$(AzureStorageAccountName) --from-literal=azurestorageaccountkey=$(AzureStorageAccountKey)'
-      - task: HelmDeploy@0
-        displayName: 'Add Secret Strore CSI Driver Helm Repo'
-        inputs:
-          connectionType: 'Kubernetes Service Connection'
-          kubernetesServiceConnection: 'kubernetesConnection'
-          namespace: 'deafult'
-          command: 'repo'
-          arguments: 'add csi-secrets-store-provider-azure https://azure.github.io/secrets-store-csi-driver-provider-azure/charts'
-      - task: HelmDeploy@0
-        displayName: 'Installing CSI Driver Helm Package'
-        inputs:
-          connectionType: 'Kubernetes Service Connection'
-          kubernetesServiceConnection: 'kubernetesConnection'
-          namespace: 'default'
-          command: 'install'
-          chartType: 'Name'
-          chartName: 'csi-secrets-store-provider-azure/csi-secrets-store-provider-azure'
-          releaseName: 'csi-azure-driver'
-          overrideValues: 'windows.enabled=true,secrets-store-csi-driver.windows.enabled=true,secrets-store-csi-driver.syncSecret.enabled=true'
       - task: replacetokens@5
         displayName: Replace Tokens
         inputs:
