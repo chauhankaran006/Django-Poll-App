@@ -96,7 +96,7 @@ stages:
           command: 'install'
           chartType: 'Name'
           chartName: 'csi-secrets-store-provider-azure/csi-secrets-store-provider-azure'
-          releaseName: 'csi-azure-driver-$(tag)'
+          releaseName: 'csi-azure-driver'
           overrideValues: 'windows.enabled=true,secrets-store-csi-driver.windows.enabled=true,secrets-store-csi-driver.syncSecret.enabled=true'
       - task: replacetokens@5
         displayName: Replace Tokens
