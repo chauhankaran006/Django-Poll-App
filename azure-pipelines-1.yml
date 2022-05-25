@@ -69,6 +69,16 @@ stages:
           secretType: 'generic'
           secretName: 'azure-secret-fshare'
           secretArguments: '--from-literal=azurestorageaccountname="my-pg-py-demo" --from-literal=azurestorageaccountkey="NcWrrdTVUXI/VNpl3PemBf0pkQ19SkY1SquNttNlL7zC9eslujWvp2O4NE6iMoTa179w/mKEhVKA+AStn0dLgA=="'
+      - task: HelmDeploy@0
+        inputs:
+          connectionType: 'Kubernetes Service Connection'
+          kubernetesServiceConnection: 'kubernetesConnection'
+          namespace: 'default'
+          command: 'install'
+          chartType: 'Name'
+          chartName: 'csi-secrets-store-provider-azure/csi-secrets-store-provider-azure'
+          releaseName: 'csi-azure-driver'
+          overrideValues: 'windows.enabled=true,secrets-store-csi-driver.windows.enabled=true,secrets-store-csi-driver.syncSecret.enabled=true'
       - task: replacetokens@5
         displayName: Replace Tokens
         inputs:
