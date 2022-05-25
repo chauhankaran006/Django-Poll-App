@@ -41,7 +41,7 @@ stages:
   variables:
     acrsecret: k8sexamplesacrauth
     acrdevurl: 'my3rddemoacr.azurecr.io'
-    replicaNo: 2
+    replicaNo: 4
   jobs:
     - job: Deploy
       displayName: Deploy to AKS
@@ -49,11 +49,13 @@ stages:
         vmImage: windows-2019
       steps:
       - task: DownloadPipelineArtifact@2
+        displayName: 'Download Pipeline Artifact'
         inputs:
           buildType: 'current'
           artifactName: 'manifests'
           targetPath: '$(Pipeline.Workspace)/manifests'
       - task: KubernetesManifest@0
+        displayName: 'Creating K8s Secrets For ACR'
         inputs:
           action: 'createSecret'
           kubernetesServiceConnection: 'kubernetesConnection'
@@ -61,14 +63,22 @@ stages:
           secretType: 'dockerRegistry'
           secretName: '$(acrsecret)'
           dockerRegistryEndpoint: 'my3rddemoacr'
+      - task: AzureKeyVault@2
+        displayName: 'Downloading Storage Account Access Key From Azure Key Vault Secret'
+        inputs:
+          azureSubscription: 'Visual Studio Enterprise Subscription – MPN(d9fd8068-6e3b-46d6-9951-5cf3dbf74daa)'
+          KeyVaultName: 'my-3rd-demo-key-vault'
+          SecretsFilter: 'AzureStorageAccountName,AzureStorageAccountKey'
+          RunAsPreJob: false
       - task: KubernetesManifest@0
+        displayName: 'Creating K8s Secret For Access File Share'
         inputs:
           action: 'createSecret'
           kubernetesServiceConnection: 'kubernetesConnection'
           namespace: 'default'
           secretType: 'generic'
           secretName: 'azure-secret-fshare'
-          secretArguments: '--from-literal=azurestorageaccountname="my-pg-py-demo" --from-literal=azurestorageaccountkey="NcWrrdTVUXI/VNpl3PemBf0pkQ19SkY1SquNttNlL7zC9eslujWvp2O4NE6iMoTa179w/mKEhVKA+AStn0dLgA=="'
+          secretArguments: '--from-literal=azurestorageaccountname=$(AzureStorageAccountName) --from-literal=azurestorageaccountkey=$(AzureStorageAccountKey)'
       - task: HelmDeploy@0
         displayName: 'Add Secret Strore CSI Driver Helm Repo'
         inputs:
@@ -78,6 +88,7 @@ stages:
           command: 'repo'
           arguments: 'add csi-secrets-store-provider-azure https://azure.github.io/secrets-store-csi-driver-provider-azure/charts'
       - task: HelmDeploy@0
+        displayName: 'Installing CSI Driver Helm Package'
         inputs:
           connectionType: 'Kubernetes Service Connection'
           kubernetesServiceConnection: 'kubernetesConnection'
@@ -105,6 +116,7 @@ stages:
           useLegacyPattern: false
           enableTelemetry: true
       - task: KubernetesManifest@0
+        displayName: 'Applying Manifests Files'
         inputs:
           action: 'deploy'
           kubernetesServiceConnection: 'kubernetesConnection'
