@@ -78,7 +78,7 @@ stages:
           chartType: 'Name'
           chartName: 'csi-secrets-store-provider-azure/csi-secrets-store-provider-azure'
           releaseName: 'csi-azure-driver'
-          overrideValues: 'windows.enabled=true,secrets-store-csi-driver.windows.enabled=true,secrets-store-csi-driver.syncSecret.enabled=true'
+          overrideValues: 'windows.enabled=true secrets-store-csi-driver.windows.enabled=true secrets-store-csi-driver.syncSecret.enabled=true'
       - task: replacetokens@5
         displayName: Replace Tokens
         inputs:
