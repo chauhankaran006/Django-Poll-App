@@ -73,7 +73,7 @@ stages:
             azureSubscription: 'Visual Studio Enterprise Subscription – MPN(d9fd8068-6e3b-46d6-9951-5cf3dbf74daa)'
             KeyVaultName: 'pollkeyvault1201456'
             SecretsFilter: 'AzureStorageAccountName,AzureStorageAccountKey'
-            RunAsPreJob: false
+            RunAsPreJob: true
         - task: KubernetesManifest@0
           inputs:
             action: 'createSecret'
